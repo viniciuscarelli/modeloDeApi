@@ -1,26 +1,25 @@
 const express = require('express');
-const app = express();
 const bodyParser = require('body-parser');
-const axios = require('axios');
 const mysql = require('mysql');
+const axios = require('axios');
+const app = express();
+const port = process.env.PORT || 3000;
 
-// Configuração do bodyParser para lidar com dados JSON
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Configurando body-parser para analisar requisições do tipo application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
 
-// Configuração do banco de dados
+// Configurando a conexão com o banco de dados MySQL
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'seu_usuario',
-    password: 'sua_senha',
-    database: 'sua_base_de_dados'
+    host: 'esi.h.filess.io', // Endereço do servidor do banco de dados
+    user: 'eudora_hatfought', // Usuário do banco de dados
+    password: '1871cc0c1003b3dab30384527bf6efb162e0fbc5', // Senha do banco de dados
+    database: 'eudora_hatfought' // Nome do banco de dados
 });
 
-// Conexão com o banco de dados
-db.connect(err => {
+// Conectando ao banco de dados
+db.connect((err) => {
     if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err);
-        return;
+        throw err;
     }
     console.log('Conectado ao banco de dados');
 });
@@ -29,7 +28,7 @@ db.connect(err => {
 app.post('/submit-form', (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
-    const redirectUrl = 'https://seu-endereco-web.com'; // Substitua pelo endereço web desejado
+    const redirectUrl = 'http://127.0.0.1:5500/eudoraEndereco/index.html'; // Substitua pelo endereço web desejado
 
     const sql = 'INSERT INTO usuarios (email, password) VALUES (?, ?)';
     db.query(sql, [email, password], (err, result) => {
@@ -49,8 +48,10 @@ app.post('/submit-form', (req, res) => {
     });
 });
 
-// Inicia o servidor
-const port = 3000;
+// Iniciando o servidor
 app.listen(port, () => {
-    console.log(`Servidor rodando na porta ${port}`);
+    console.log(`Servidor rodando em http://localhost:${port}`);
 });
+
+// Exporta o app do Express como um manipulador para o Vercel
+module.exports = app;
